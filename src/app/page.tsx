@@ -129,6 +129,12 @@ function SectionResults({ section, scores }: { section: ScorecardSection; scores
 // ── Main ────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+
   const [tab, setTab] = useState<"score" | "settings" | "samples">("score");
   const [scorecard, setScorecard] = useState<Scorecard>(DEFAULT_SCORECARD);
   const [transcript, setTranscript] = useState("");
@@ -141,6 +147,99 @@ export default function Home() {
   const [loadingIdx, setLoadingIdx] = useState(0);
   const [dragT, setDragT] = useState(false);
   const [dragS, setDragS] = useState(false);
+
+  // Check if password is even required
+  useEffect(() => {
+    const stored = sessionStorage.getItem("qa_auth");
+    if (stored === "true") { setAuthenticated(true); setAuthChecked(true); return; }
+    fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: "__check_if_required__" }),
+    }).then((r) => {
+      if (r.ok) { setAuthenticated(true); sessionStorage.setItem("qa_auth", "true"); }
+      setAuthChecked(true);
+    }).catch(() => setAuthChecked(true));
+  }, []);
+
+  const handleLogin = async () => {
+    setAuthLoading(true); setAuthError("");
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: authPassword }),
+      });
+      if (res.ok) {
+        setAuthenticated(true);
+        sessionStorage.setItem("qa_auth", "true");
+      } else {
+        setAuthError("Incorrect password");
+      }
+    } catch {
+      setAuthError("Connection error");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // ── Login Screen ────────────────────────────────────────────────────
+  if (!authChecked) {
+    return (
+      <div style={{ minHeight: "100vh", background: P.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontSize: 12, color: P.textMuted, fontFamily: F }}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <div style={{
+        minHeight: "100vh", background: P.bg, display: "flex",
+        alignItems: "center", justifyContent: "center", fontFamily: F,
+      }}>
+        <div style={{
+          width: 380, padding: 32, background: P.surface,
+          border: `1px solid ${P.border}`, borderRadius: 12,
+        }}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: P.accent, marginBottom: 4, letterSpacing: -0.5 }}>
+            ▧ CALL QA SCORER
+          </div>
+          <div style={{ fontSize: 11, color: P.textMuted, marginBottom: 24 }}>
+            Enter password to continue
+          </div>
+          <input
+            type="password"
+            value={authPassword}
+            onChange={(e) => setAuthPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            placeholder="Password"
+            autoFocus
+            style={{
+              width: "100%", padding: "12px 14px", background: P.surfaceAlt,
+              border: `1px solid ${authError ? P.danger : P.border}`, borderRadius: 6,
+              color: P.text, fontFamily: F, fontSize: 13, outline: "none",
+              boxSizing: "border-box", marginBottom: 12,
+            }}
+          />
+          {authError && (
+            <div style={{ fontSize: 11, color: P.danger, marginBottom: 12 }}>{authError}</div>
+          )}
+          <button
+            onClick={handleLogin}
+            disabled={authLoading || !authPassword}
+            style={{
+              width: "100%", padding: "12px", background: P.accent, color: P.bg,
+              fontFamily: F, fontSize: 13, fontWeight: 700, border: "none",
+              borderRadius: 6, cursor: "pointer", opacity: !authPassword ? 0.4 : 1,
+            }}
+          >
+            {authLoading ? "Verifying..." : "Enter"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const loadingMsgs = [
     "Parsing transcript...",
