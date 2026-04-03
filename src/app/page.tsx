@@ -150,16 +150,21 @@ export default function Home() {
 
   // Check if password is even required
   useEffect(() => {
-    const stored = sessionStorage.getItem("qa_auth");
-    if (stored === "true") { setAuthenticated(true); setAuthChecked(true); return; }
+    try {
+      const stored = typeof window !== "undefined" ? sessionStorage.getItem("qa_auth") : null;
+      if (stored === "true") { setAuthenticated(true); setAuthChecked(true); return; }
+    } catch (_e) { /* sessionStorage unavailable */ }
     fetch("/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: "__check_if_required__" }),
     }).then((r) => {
-      if (r.ok) { setAuthenticated(true); sessionStorage.setItem("qa_auth", "true"); }
+      if (r.ok) {
+        setAuthenticated(true);
+        try { sessionStorage.setItem("qa_auth", "true"); } catch (_e) { /* ignore */ }
+      }
       setAuthChecked(true);
-    }).catch(() => setAuthChecked(true));
+    }).catch((_err) => setAuthChecked(true));
   }, []);
 
   const handleLogin = async () => {
@@ -172,11 +177,11 @@ export default function Home() {
       });
       if (res.ok) {
         setAuthenticated(true);
-        sessionStorage.setItem("qa_auth", "true");
+        try { sessionStorage.setItem("qa_auth", "true"); } catch (_e) { /* ignore */ }
       } else {
         setAuthError("Incorrect password");
       }
-    } catch {
+    } catch (_err) {
       setAuthError("Connection error");
     } finally {
       setAuthLoading(false);
