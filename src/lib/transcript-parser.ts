@@ -238,7 +238,7 @@ function parseCSV(text: string): ParsedTranscript[] {
 
   groups.forEach((groupRows, callId) => {
     idx++;
-    const speakers = [...new Set(groupRows.map((r) => r.speaker))];
+    const speakers = Array.from(new Set(groupRows.map((r) => r.speaker)));
     const speakerRoles: Record<string, "agent" | "customer"> = {};
 
     // Classify speakers
