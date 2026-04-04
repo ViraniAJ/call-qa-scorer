@@ -188,64 +188,6 @@ export default function Home() {
     }
   };
 
-  // ── Login Screen ────────────────────────────────────────────────────
-  if (!authChecked) {
-    return (
-      <div style={{ minHeight: "100vh", background: P.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontSize: 12, color: P.textMuted, fontFamily: F }}>Loading...</div>
-      </div>
-    );
-  }
-
-  if (!authenticated) {
-    return (
-      <div style={{
-        minHeight: "100vh", background: P.bg, display: "flex",
-        alignItems: "center", justifyContent: "center", fontFamily: F,
-      }}>
-        <div style={{
-          width: 380, padding: 32, background: P.surface,
-          border: `1px solid ${P.border}`, borderRadius: 12,
-        }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: P.accent, marginBottom: 4, letterSpacing: -0.5 }}>
-            ▧ CALL QA SCORER
-          </div>
-          <div style={{ fontSize: 11, color: P.textMuted, marginBottom: 24 }}>
-            Enter password to continue
-          </div>
-          <input
-            type="password"
-            value={authPassword}
-            onChange={(e) => setAuthPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            placeholder="Password"
-            autoFocus
-            style={{
-              width: "100%", padding: "12px 14px", background: P.surfaceAlt,
-              border: `1px solid ${authError ? P.danger : P.border}`, borderRadius: 6,
-              color: P.text, fontFamily: F, fontSize: 13, outline: "none",
-              boxSizing: "border-box", marginBottom: 12,
-            }}
-          />
-          {authError && (
-            <div style={{ fontSize: 11, color: P.danger, marginBottom: 12 }}>{authError}</div>
-          )}
-          <button
-            onClick={handleLogin}
-            disabled={authLoading || !authPassword}
-            style={{
-              width: "100%", padding: "12px", background: P.accent, color: P.bg,
-              fontFamily: F, fontSize: 13, fontWeight: 700, border: "none",
-              borderRadius: 6, cursor: "pointer", opacity: !authPassword ? 0.4 : 1,
-            }}
-          >
-            {authLoading ? "Verifying..." : "Enter"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const loadingMsgs = [
     "Parsing transcript...",
     "Evaluating compliance items...",
@@ -306,6 +248,65 @@ export default function Home() {
     fontFamily: F, fontSize: 12, fontWeight: 700, border: "none",
     borderRadius: 6, cursor: "pointer", padding: "10px 20px", letterSpacing: 0.5,
   };
+
+  // ── Loading screen ──────────────────────────────────────────────────
+  if (!authChecked) {
+    return (
+      <div style={{ minHeight: "100vh", background: P.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontSize: 12, color: P.textMuted, fontFamily: F }}>Loading...</div>
+      </div>
+    );
+  }
+
+  // ── Login screen ────────────────────────────────────────────────────
+  if (!authenticated) {
+    return (
+      <div style={{
+        minHeight: "100vh", background: P.bg, display: "flex",
+        alignItems: "center", justifyContent: "center", fontFamily: F,
+      }}>
+        <div style={{
+          width: 380, padding: 32, background: P.surface,
+          border: `1px solid ${P.border}`, borderRadius: 12,
+        }}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: P.accent, marginBottom: 4, letterSpacing: -0.5 }}>
+            ▧ CALL QA SCORER
+          </div>
+          <div style={{ fontSize: 11, color: P.textMuted, marginBottom: 24 }}>
+            Enter password to continue
+          </div>
+          <input
+            type="password"
+            value={authPassword}
+            onChange={(e) => setAuthPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            placeholder="Password"
+            autoFocus
+            style={{
+              width: "100%", padding: "12px 14px", background: P.surfaceAlt,
+              border: `1px solid ${authError ? P.danger : P.border}`, borderRadius: 6,
+              color: P.text, fontFamily: F, fontSize: 13, outline: "none",
+              boxSizing: "border-box", marginBottom: 12,
+            }}
+          />
+          {authError && (
+            <div style={{ fontSize: 11, color: P.danger, marginBottom: 12 }}>{authError}</div>
+          )}
+          <button
+            onClick={handleLogin}
+            disabled={authLoading || !authPassword}
+            style={{
+              width: "100%", padding: "12px", background: P.accent, color: P.bg,
+              fontFamily: F, fontSize: 13, fontWeight: 700, border: "none",
+              borderRadius: 6, cursor: "pointer", opacity: !authPassword ? 0.4 : 1,
+            }}
+          >
+            {authLoading ? "Verifying..." : "Enter"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: P.bg, color: P.text, fontFamily: F }}>
